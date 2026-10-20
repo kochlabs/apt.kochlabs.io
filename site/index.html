@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kochlabs apt repository</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<h1>Kochlabs apt repository</h1>
+<p>Debian and Ubuntu packages for Kochlabs open-source projects, built and
+published from their GitHub repositories. Every package here was built by its
+project's release workflow, which is checked through GitHub build attestations
+before it is published.</p>
+
+<h2>Packages</h2>
+<ul>
+<li><a href="https://github.com/kochlabs/tributary"><b>tributary</b></a>: self-hosted network flow analytics (NetFlow, IPFIX, sFlow).
+It also needs ClickHouse's repository: see its
+<a href="https://github.com/kochlabs/tributary/blob/main/docs/INSTALL.md">installation guide</a>,
+or use its <code>install.sh</code>, which sets up both.</li>
+</ul>
+
+<h2>Set up</h2>
+<p>Fetch the signing key and check its fingerprint:</p>
+<pre><code>curl -fsSL https://apt.kochlabs.io/kochlabs.gpg -o kochlabs.gpg
+gpg --show-keys --with-fingerprint kochlabs.gpg</code></pre>
+<p>It must show <b>Kochlabs APT Repository</b> with this fingerprint:</p>
+<pre class="fpr"><code>@FINGERPRINT@</code></pre>
+<p>Then add the repository, trusting the key for it alone, and allow only
+Kochlabs' packages from it:</p>
+<pre><code>sudo install -m 644 kochlabs.gpg /usr/share/keyrings/kochlabs.gpg
+echo "deb [signed-by=/usr/share/keyrings/kochlabs.gpg] https://apt.kochlabs.io stable main" \
+  | sudo tee /etc/apt/sources.list.d/kochlabs.list
+sudo tee /etc/apt/preferences.d/kochlabs &lt;&lt;'EOF'
+# Only Kochlabs' own packages may come from its repository.
+Package: tributary
+Pin: origin apt.kochlabs.io
+Pin-Priority: 500
+
+Package: *
+Pin: origin apt.kochlabs.io
+Pin-Priority: -1
+EOF
+sudo apt update</code></pre>
+
+<h2>Files</h2>
+<ul>
+<li><a href="kochlabs.gpg">kochlabs.gpg</a> and <a href="kochlabs.asc">kochlabs.asc</a>: the signing key (binary and armored)</li>
+<li><a href="dists/stable/InRelease">dists/stable/InRelease</a>: the signed index</li>
+<li><a href="https://github.com/kochlabs/apt.kochlabs.io">github.com/kochlabs/apt.kochlabs.io</a>: how this repository is built</li>
+</ul>
+</main>
+</body>
+</html>
